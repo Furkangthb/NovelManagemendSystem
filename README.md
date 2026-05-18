@@ -6,7 +6,7 @@ Yazarların novel ve bölüm yayınlayabildiği, okuyucuların okuyup yorum yapa
 
 | Katman | Teknoloji |
 |---|---|
-| Frontend | Vanilla JavaScript, HTML, CSS (SPA) |
+| Frontend | Vanilla JavaScript, HTML, CSS |
 | Backend | Node.js, Express.js |
 | Veritabanı | PostgreSQL |
 | Auth | JWT + bcrypt |
@@ -14,6 +14,8 @@ Yazarların novel ve bölüm yayınlayabildiği, okuyucuların okuyup yorum yapa
 | Test | Jest |
 
 ## 📁 Proje Yapısı
+
+```
 NovelManagemendSystem/
 ├── Backend/
 │   ├── config/          # Veritabanı bağlantısı
@@ -27,13 +29,13 @@ NovelManagemendSystem/
 │   ├── swagger.yaml     # API dokümantasyonu
 │   └── .env             # Ortam değişkenleri
 └── frontend/
-├── css/             # Stil dosyaları
-├── js/
-│   ├── pages/       # Sayfa bileşenleri
-│   ├── api.js       # Backend iletişimi
-│   ├── auth.js      # Kullanıcı işlemleri
-│   └── app.js       # Router ve navbar
-└── index.html       # Tek sayfa uygulaması
+    ├── css/             # Stil dosyaları
+    ├── js/
+    │   ├── pages/       # Sayfa bileşenleri
+    │   ├── api.js       # Backend iletişimi
+    │   ├── auth.js      # Kullanıcı işlemleri
+    │   └── app.js       # Router ve navbar
+    └── index.html       # Tek sayfa uygulaması
 
 ## ⚙️ Kurulum
 
