@@ -34,29 +34,40 @@ const panelPage = {
         return;
       }
 
-      container.innerHTML = myNovels.map(novel => `
-        <div class="panel-novel-item">
-          <div>
-            <div class="panel-novel-title" 
-              onclick="router.navigate('novel', {id: ${novel.id}})">
-              ${novel.title}
+      container.innerHTML = myNovels.map(novel => {
+        let genresArray = novel.genres || [];
+        if (typeof novel.genres === 'string') {
+          genresArray = novel.genres.replace(/[{}]/g, '').split(',').map(g => g.trim());
+        }
+        
+        const genresText = (genresArray.length > 0 && genresArray[0] !== "") 
+          ? genresArray.join(', ') 
+          : 'Tür yok';
+
+        return `
+          <div class="panel-novel-item">
+            <div>
+              <div class="panel-novel-title" 
+                onclick="router.navigate('novel', {id: ${novel.id}})">
+                ${novel.title}
+              </div>
+              <div class="panel-novel-meta">
+                ${genresText} • ${novel.status}
+              </div>
             </div>
-            <div class="panel-novel-meta">
-              ${novel.genre || 'Tür yok'} • ${novel.status}
+            <div class="panel-novel-actions">
+              <button class="btn btn-outline" 
+                onclick="router.navigate('novel', {id: ${novel.id}})">
+                Görüntüle
+              </button>
+              <button class="btn btn-danger" 
+                onclick="panelPage.deleteNovel(${novel.id})">
+                🗑️ Sil
+              </button>
             </div>
           </div>
-          <div class="panel-novel-actions">
-            <button class="btn btn-outline" 
-              onclick="router.navigate('novel', {id: ${novel.id}})">
-              Görüntüle
-            </button>
-            <button class="btn btn-danger" 
-              onclick="panelPage.deleteNovel(${novel.id})">
-              🗑️ Sil
-            </button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     } catch (error) {
       document.getElementById('my-novels').innerHTML = `
         <p class="error-msg">${error.message}</p>
@@ -84,18 +95,19 @@ const panelPage = {
             placeholder="Novel hakkında kısa bilgi..."></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">Tür</label>
-          <select id="novel-genre" class="form-input">
-            <option value="">Tür seçin</option>
-            ${['Aksiyon','Fantastik','Romance','Korku','Bilim Kurgu','Gizem','Dram','Komedi'].map(g => `
-              <option value="${g}">${g}</option>
+          <label class="form-label">Türler (Birden fazla seçebilirsiniz)</label>
+          <div id="novel-genres" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            ${['Aksiyon', 'Fantastik', 'Romance', 'Korku', 'Bilim Kurgu', 'Gizem', 'Dram', 'Komedi'].map(g => `
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" value="${g}" class="genre-checkbox"> ${g}
+              </label>
             `).join('')}
-          </select>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Durum</label>
           <select id="novel-status" class="form-input">
-            ${['Devam Ediyor','Tamamlandı','Askıya Alındı'].map(s => `
+            ${['Devam Ediyor', 'Tamamlandı', 'Askıya Alındı'].map(s => `
               <option value="${s}">${s}</option>
             `).join('')}
           </select>
@@ -115,7 +127,7 @@ const panelPage = {
     const title = document.getElementById('novel-title').value;
     const author = document.getElementById('novel-author').value;
     const description = document.getElementById('novel-description').value;
-    const genre = document.getElementById('novel-genre').value;
+    const genres = Array.from(document.querySelectorAll('.genre-checkbox:checked')).map(cb => cb.value);
     const status = document.getElementById('novel-status').value;
     const errorDiv = document.getElementById('novel-error');
 
@@ -124,8 +136,13 @@ const panelPage = {
       return;
     }
 
+    if (genres.length === 0) {
+      errorDiv.textContent = 'En az bir tür seçmelisiniz';
+      return;
+    }
+
     try {
-      await api.createNovel({ title, author, description, genre, status });
+      await api.createNovel({ title, author, description, genres, status });
       document.querySelector('.modal-overlay').remove();
       await panelPage.loadMyNovels();
     } catch (error) {

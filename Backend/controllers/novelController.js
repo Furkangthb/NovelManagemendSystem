@@ -2,8 +2,8 @@ const novelService = require('../services/novelService');
 
 const createNovel = async (req, res) => {
   try {
-    const { title, author, description, genre, status } = req.body;
-    const novel = await novelService.createNovel(req.user.id, title, author, description, genre, status);
+    const { title, author, description, genres, status } = req.body;
+    const novel = await novelService.createNovel(req.user.id, title, author, description, genres, status);
     res.status(201).json({ message: 'Novel oluşturuldu', novel });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -31,8 +31,8 @@ const getNovelById = async (req, res) => {
 
 const updateNovel = async (req, res) => {
   try {
-    const { title, author, description, genre, status } = req.body;
-    const novel = await novelService.updateNovel(req.params.id, req.user.id, title, author, description, genre, status);
+    const { title, author, description, genres, status } = req.body;
+    const novel = await novelService.updateNovel(req.params.id, req.user.id, title, author, description, genres, status);
     res.status(200).json({ message: 'Novel güncellendi', novel });
   } catch (error) {
     res.status(400).json({ error: error.message });

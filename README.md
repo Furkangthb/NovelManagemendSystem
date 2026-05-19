@@ -15,7 +15,7 @@ Yazarların novel ve bölüm yayınlayabildiği, okuyucuların okuyup yorum yapa
 
 ## 📁 Proje Yapısı
 
-```
+```text
 NovelManagemendSystem/
 ├── Backend/
 │   ├── config/          # Veritabanı bağlantısı
@@ -36,6 +36,7 @@ NovelManagemendSystem/
     │   ├── auth.js      # Kullanıcı işlemleri
     │   └── app.js       # Router ve navbar
     └── index.html       # Tek sayfa uygulaması
+```
 
 ## ⚙️ Kurulum
 
@@ -63,7 +64,7 @@ ALTER DATABASE novel_db OWNER TO novel_user;
 ```
 
 ### 3. Tabloları Oluştur
-psql ile şunu çalıştır:
+psql ile (veya DBeaver üzerinden) şu komutları çalıştır:
 ```sql
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -112,7 +113,8 @@ cd Backend
 npm install
 ```
 
-`.env` dosyası oluştur:
+Backend klasöründe `.env` dosyası oluştur:
+```
 PORT=5000
 DB_HOST=localhost
 DB_PORT=5432
@@ -121,6 +123,7 @@ DB_USER=novel_user
 DB_PASSWORD=novel123
 JWT_SECRET=novel_gizli_anahtar_2024
 JWT_EXPIRES_IN=24h
+```
 
 ### 5. Backend'i Başlat
 ```bash
@@ -128,6 +131,7 @@ npm start
 ```
 
 ### 6. Frontend'i Başlat
+Yeni bir terminal sekmesi açarak:
 ```bash
 cd ../frontend
 npx serve .
@@ -182,14 +186,17 @@ cd Backend
 npm test
 ```
 
-Toplam **34 unit test** — authService, novelService, chapterService, commentService katmanları test edilmektedir.
+Toplam **34 unit test** — authService, novelService, chapterService ve commentService katmanları %100 başarı oranıyla test edilmektedir.
 
 ## 🗄️ Veritabanı Şeması
+
+```
 users (id, username, email, password_hash, role, created_at)
-↓ 1-N
+  ↓ 1-N
 novels (id, user_id, title, author, description, genre, status, created_at)
-↓ 1-N                    ↓ 1-N
-chapters (...)          comments (...)
+  ↓ 1-N                      ↓ 1-N
+chapters (...)             comments (...)
+```
 
 ## 👤 Kullanıcı Rolleri
 
@@ -197,4 +204,3 @@ chapters (...)          comments (...)
 |---|---|
 | reader | Novel okuma, yorum yapma |
 | author | Novel/bölüm ekleme, düzenleme, silme |
-

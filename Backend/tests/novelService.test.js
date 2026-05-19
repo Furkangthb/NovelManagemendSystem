@@ -14,34 +14,35 @@ describe('novelService', () => {
     test('başarılı novel oluşturma', async () => {
       novelModel.createNovel.mockResolvedValue({
         id: 1, user_id: 1, title: 'Solo Leveling',
-        author: 'Chugong', genre: 'Fantastik', status: 'Devam Ediyor'
+        author: 'Chugong', genres: ['Fantastik', 'Aksiyon'], status: 'Devam Ediyor'
       });
 
-      const result = await novelService.createNovel(1, 'Solo Leveling', 'Chugong', 'Açıklama', 'Fantastik', 'Devam Ediyor');
+      const result = await novelService.createNovel(1, 'Solo Leveling', 'Chugong', 'Açıklama', ['Fantastik', 'Aksiyon'], 'Devam Ediyor');
       expect(result.title).toBe('Solo Leveling');
+      expect(result.genres).toContain('Fantastik');
     });
 
     test('başlık boşsa hata fırlatır', async () => {
       await expect(
-        novelService.createNovel(1, '', 'Chugong', 'Açıklama', 'Fantastik', 'Devam Ediyor')
+        novelService.createNovel(1, '', 'Chugong', 'Açıklama', ['Fantastik'], 'Devam Ediyor')
       ).rejects.toThrow('Başlık ve yazar zorunludur');
     });
 
     test('yazar boşsa hata fırlatır', async () => {
       await expect(
-        novelService.createNovel(1, 'Solo Leveling', '', 'Açıklama', 'Fantastik', 'Devam Ediyor')
+        novelService.createNovel(1, 'Solo Leveling', '', 'Açıklama', ['Fantastik'], 'Devam Ediyor')
       ).rejects.toThrow('Başlık ve yazar zorunludur');
     });
 
-    test('geçersiz tür varsa hata fırlatır', async () => {
+    test('tür dizisi boş veya geçersizse hata fırlatır', async () => {
       await expect(
-        novelService.createNovel(1, 'Solo Leveling', 'Chugong', 'Açıklama', 'GeçersizTür', 'Devam Ediyor')
-      ).rejects.toThrow('Geçersiz tür');
+        novelService.createNovel(1, 'Solo Leveling', 'Chugong', 'Açıklama', [], 'Devam Ediyor')
+      ).rejects.toThrow('En az bir tür seçmelisiniz');
     });
 
     test('geçersiz durum varsa hata fırlatır', async () => {
       await expect(
-        novelService.createNovel(1, 'Solo Leveling', 'Chugong', 'Açıklama', 'Fantastik', 'GeçersizDurum')
+        novelService.createNovel(1, 'Solo Leveling', 'Chugong', 'Açıklama', ['Fantastik'], 'GeçersizDurum')
       ).rejects.toThrow('Geçersiz durum');
     });
 
@@ -59,7 +60,7 @@ describe('novelService', () => {
 
     test('başarılı novel getirme', async () => {
       novelModel.getNovelById.mockResolvedValue({
-        id: 1, title: 'Solo Leveling'
+        id: 1, title: 'Solo Leveling', genres: ['Aksiyon']
       });
 
       const result = await novelService.getNovelById(1);
@@ -74,7 +75,7 @@ describe('novelService', () => {
       novelModel.getNovelById.mockResolvedValue(null);
 
       await expect(
-        novelService.updateNovel(999, 1, 'Başlık', 'Yazar', 'Açıklama', 'Fantastik', 'Devam Ediyor')
+        novelService.updateNovel(999, 1, 'Başlık', 'Yazar', 'Açıklama', ['Fantastik'], 'Devam Ediyor')
       ).rejects.toThrow('Novel bulunamadı');
     });
 
@@ -82,7 +83,7 @@ describe('novelService', () => {
       novelModel.getNovelById.mockResolvedValue({ id: 1, user_id: 2 });
 
       await expect(
-        novelService.updateNovel(1, 1, 'Başlık', 'Yazar', 'Açıklama', 'Fantastik', 'Devam Ediyor')
+        novelService.updateNovel(1, 1, 'Başlık', 'Yazar', 'Açıklama', ['Fantastik'], 'Devam Ediyor')
       ).rejects.toThrow('Bu noveli düzenleme yetkiniz yok');
     });
 

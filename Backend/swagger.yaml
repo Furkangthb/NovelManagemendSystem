@@ -1,10 +1,11 @@
 openapi: 3.0.0
 info:
-  title: Dijital Novel Yayın ve Yönetim Sistemi API
-  description: Novel yayın platformu için RESTful API
+  title: NovelHub API
+  description: E-Kitap/Novel Okuma ve Yönetim Platformu API Dokümantasyonu
   version: 1.0.0
 servers:
   - url: http://localhost:5000/api
+    description: Yerel Geliştirme Sunucusu
 
 components:
   securitySchemes:
@@ -12,80 +13,72 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
   schemas:
-    User:
+    NovelInput:
       type: object
+      required:
+        - title
+        - author
+        - genres
       properties:
-        id:
-          type: integer
-        username:
-          type: string
-        email:
-          type: string
-        role:
-          type: string
-          enum: [reader, author]
-    Novel:
-      type: object
-      properties:
-        id:
-          type: integer
-        user_id:
-          type: integer
         title:
           type: string
+          example: "Solo Leveling"
         author:
           type: string
+          example: "Chugong"
         description:
           type: string
-        genre:
-          type: string
-          enum: [Aksiyon, Fantastik, Romance, Korku, Bilim Kurgu, Gizem, Dram, Komedi]
+          example: "En zayıf avcının en güçlüye dönüşme hikayesi."
+        genres:
+          type: array
+          items:
+            type: string
+          example: ["Aksiyon", "Fantastik"]
         status:
           type: string
           enum: [Devam Ediyor, Tamamlandı, Askıya Alındı]
-        created_at:
-          type: string
-    Chapter:
+          example: "Tamamlandı"
+
+    ChapterInput:
       type: object
+      required:
+        - chapter_number
+        - title
+        - content
       properties:
-        id:
-          type: integer
-        novel_id:
-          type: integer
         chapter_number:
           type: integer
+          example: 1
         title:
           type: string
+          example: "Uyanış"
         content:
           type: string
-        created_at:
-          type: string
-    Comment:
+          description: "Sayfalar |||PAGE||| ayracı ile bölünmelidir."
+          example: "Sistem mesajı belirdi.|||PAGE|||Görev: Hayatta Kal."
+
+    CommentInput:
       type: object
+      required:
+        - text
+        - rating
       properties:
-        id:
-          type: integer
-        novel_id:
-          type: integer
-        user_id:
-          type: integer
-        username:
-          type: string
         text:
           type: string
+          example: "Dövüş sahneleri muazzamdı!"
         rating:
           type: integer
           minimum: 1
           maximum: 5
-        created_at:
-          type: string
+          example: 5
 
 paths:
   /auth/register:
     post:
-      tags: [Auth]
       summary: Yeni kullanıcı kaydı
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -96,27 +89,21 @@ paths:
               properties:
                 username:
                   type: string
-                  example: furkan
                 email:
                   type: string
-                  example: furkan@test.com
                 password:
                   type: string
-                  example: "123456"
                 role:
                   type: string
                   enum: [reader, author]
-                  example: author
       responses:
         '201':
-          description: Kayıt başarılı
-        '400':
-          description: Hata
+          description: Başarılı kayıt
 
   /auth/login:
     post:
-      tags: [Auth]
       summary: Kullanıcı girişi
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -127,42 +114,39 @@ paths:
               properties:
                 email:
                   type: string
-                  example: furkan@test.com
                 password:
                   type: string
-                  example: "123456"
       responses:
         '200':
-          description: Giriş başarılı, token döner
-        '400':
-          description: Hatalı bilgi
+          description: Başarılı giriş (JWT Token döner)
 
   /novels:
     get:
+      summary: Tüm novelleri getir (Filtreleme destekler)
       tags: [Novels]
-      summary: Tüm novelleri listele
       parameters:
-        - in: query
-          name: genre
-          schema:
-            type: string
-          example: Fantastik
-        - in: query
-          name: status
-          schema:
-            type: string
-          example: Devam Ediyor
         - in: query
           name: search
           schema:
             type: string
-          example: Solo
+          description: Başlık veya yazar araması
+        - in: query
+          name: genre
+          schema:
+            type: string
+          description: Türe göre filtrele
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: Duruma göre filtrele
       responses:
         '200':
-          description: Novel listesi
+          description: Novel listesi başarıyla getirildi
+
     post:
+      summary: Yeni novel ekle (Sadece Yazarlar)
       tags: [Novels]
-      summary: Yeni novel oluştur
       security:
         - bearerAuth: []
       requestBody:
@@ -170,51 +154,28 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [title, author]
-              properties:
-                title:
-                  type: string
-                  example: Solo Leveling
-                author:
-                  type: string
-                  example: Chugong
-                description:
-                  type: string
-                  example: Hunters dünyası
-                genre:
-                  type: string
-                  example: Fantastik
-                status:
-                  type: string
-                  example: Tamamlandı
+              $ref: '#/components/schemas/NovelInput'
       responses:
         '201':
-          description: Novel oluşturuldu
-        '400':
-          description: Hata
-        '401':
-          description: Token gerekli
+          description: Novel başarıyla oluşturuldu
 
   /novels/{id}:
     get:
+      summary: Tek bir novel detayını getir
       tags: [Novels]
-      summary: Novel detayı
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: integer
-          example: 1
       responses:
         '200':
-          description: Novel detayı
-        '404':
-          description: Novel bulunamadı
+          description: Novel detayları
+
     put:
+      summary: Noveli güncelle (Sadece Romanın Sahibi)
       tags: [Novels]
-      summary: Novel güncelle
       security:
         - bearerAuth: []
       parameters:
@@ -228,26 +189,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                author:
-                  type: string
-                description:
-                  type: string
-                genre:
-                  type: string
-                status:
-                  type: string
+              $ref: '#/components/schemas/NovelInput'
       responses:
         '200':
-          description: Novel güncellendi
-        '400':
-          description: Hata
+          description: Güncelleme başarılı
+
     delete:
+      summary: Noveli sil (Sadece Romanın Sahibi)
       tags: [Novels]
-      summary: Novel sil
       security:
         - bearerAuth: []
       parameters:
@@ -258,14 +207,12 @@ paths:
             type: integer
       responses:
         '200':
-          description: Novel silindi
-        '400':
-          description: Hata
+          description: Silme başarılı
 
   /novels/{novelId}/chapters:
     get:
+      summary: Novele ait tüm bölümleri listele
       tags: [Chapters]
-      summary: Novelin bölümlerini listele
       parameters:
         - in: path
           name: novelId
@@ -274,10 +221,11 @@ paths:
             type: integer
       responses:
         '200':
-          description: Bölüm listesi
+          description: Bölüm listesi getirildi
+          
     post:
+      summary: Novele yeni bölüm ekle (Sadece Romanın Sahibi)
       tags: [Chapters]
-      summary: Yeni bölüm ekle
       security:
         - bearerAuth: []
       parameters:
@@ -291,28 +239,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [chapter_number, title, content]
-              properties:
-                chapter_number:
-                  type: integer
-                  example: 1
-                title:
-                  type: string
-                  example: Başlangıç
-                content:
-                  type: string
-                  example: Bu hikayenin ilk bölümüdür...
+              $ref: '#/components/schemas/ChapterInput'
       responses:
         '201':
-          description: Bölüm oluşturuldu
-        '400':
-          description: Hata
+          description: Bölüm başarıyla eklendi
 
   /chapters/{id}:
     get:
+      summary: Tek bir bölümün içeriğini getir
       tags: [Chapters]
-      summary: Bölüm detayı
       parameters:
         - in: path
           name: id
@@ -321,12 +256,11 @@ paths:
             type: integer
       responses:
         '200':
-          description: Bölüm detayı
-        '404':
-          description: Bölüm bulunamadı
+          description: Bölüm içeriği başarıyla getirildi
+          
     put:
+      summary: Bölümü düzenle
       tags: [Chapters]
-      summary: Bölüm güncelle
       security:
         - bearerAuth: []
       parameters:
@@ -340,21 +274,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [title, content]
-              properties:
-                title:
-                  type: string
-                content:
-                  type: string
+              $ref: '#/components/schemas/ChapterInput'
       responses:
         '200':
-          description: Bölüm güncellendi
-        '400':
-          description: Hata
+          description: Bölüm başarıyla güncellendi
+
     delete:
+      summary: Bölümü sil
       tags: [Chapters]
-      summary: Bölüm sil
       security:
         - bearerAuth: []
       parameters:
@@ -365,14 +292,12 @@ paths:
             type: integer
       responses:
         '200':
-          description: Bölüm silindi
-        '400':
-          description: Hata
+          description: Bölüm başarıyla silindi
 
   /novels/{novelId}/comments:
     get:
+      summary: Novele ait yorumları getir
       tags: [Comments]
-      summary: Novelin yorumlarını listele
       parameters:
         - in: path
           name: novelId
@@ -381,10 +306,11 @@ paths:
             type: integer
       responses:
         '200':
-          description: Yorum listesi
+          description: Yorumlar başarıyla getirildi
+
     post:
+      summary: Novele yorum ve puan ekle
       tags: [Comments]
-      summary: Yorum ekle
       security:
         - bearerAuth: []
       parameters:
@@ -398,27 +324,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [text, rating]
-              properties:
-                text:
-                  type: string
-                  example: Harika bir novel!
-                rating:
-                  type: integer
-                  minimum: 1
-                  maximum: 5
-                  example: 5
+              $ref: '#/components/schemas/CommentInput'
       responses:
         '201':
           description: Yorum eklendi
-        '400':
-          description: Hata
 
   /novels/comments/{id}:
     delete:
+      summary: Yorumu sil (Sadece Yorum Sahibi)
       tags: [Comments]
-      summary: Yorum sil
       security:
         - bearerAuth: []
       parameters:
@@ -430,5 +344,3 @@ paths:
       responses:
         '200':
           description: Yorum silindi
-        '400':
-          description: Hata

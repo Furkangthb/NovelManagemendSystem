@@ -13,16 +13,17 @@ describe('chapterService', () => {
 
   describe('createChapter', () => {
 
-    test('başarılı bölüm oluşturma', async () => {
+    test('başarılı çok sayfalı bölüm oluşturma', async () => {
       novelModel.getNovelById.mockResolvedValue({ id: 1, user_id: 1 });
       chapterModel.getChapterByNumber.mockResolvedValue(null);
       chapterModel.createChapter.mockResolvedValue({
         id: 1, novel_id: 1, chapter_number: 1,
-        title: 'Başlangıç', content: 'İçerik...'
+        title: 'Başlangıç', content: 'Sayfa 1 içeriği|||PAGE|||Sayfa 2 içeriği'
       });
 
-      const result = await chapterService.createChapter(1, 1, 1, 'Başlangıç', 'İçerik...');
+      const result = await chapterService.createChapter(1, 1, 1, 'Başlangıç', 'Sayfa 1 içeriği|||PAGE|||Sayfa 2 içeriği');
       expect(result.title).toBe('Başlangıç');
+      expect(result.content).toContain('|||PAGE|||');
     });
 
     test('içerik boşsa hata fırlatır', async () => {

@@ -1,9 +1,9 @@
 const pool = require('../config/db');
 
-const createNovel = async (user_id, title, author, description, genre, status) => {
+const createNovel = async (user_id, title, author, description, genres, status) => {
   const result = await pool.query(
-    'INSERT INTO novels (user_id, title, author, description, genre, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-    [user_id, title, author, description, genre, status]
+    'INSERT INTO novels (user_id, title, author, description, genres, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+    [user_id, title, author, description, genres, status]
   );
   return result.rows[0];
 };
@@ -13,13 +13,16 @@ const getAllNovels = async (genre, status, search) => {
   const params = [];
 
   if (genre) {
-    params.push(genre);
-    query += ` AND genre = $${params.length}`;
+
+    params.push(`%${genre}%`);
+    query += ` AND genres::text ILIKE $${params.length}`;
   }
+
   if (status) {
     params.push(status);
     query += ` AND status = $${params.length}`;
   }
+
   if (search) {
     params.push(`%${search}%`);
     query += ` AND (title ILIKE $${params.length} OR author ILIKE $${params.length})`;
@@ -38,10 +41,10 @@ const getNovelById = async (id) => {
   return result.rows[0];
 };
 
-const updateNovel = async (id, title, author, description, genre, status) => {
+const updateNovel = async (id, title, author, description, genres, status) => {
   const result = await pool.query(
-    'UPDATE novels SET title=$1, author=$2, description=$3, genre=$4, status=$5 WHERE id=$6 RETURNING *',
-    [title, author, description, genre, status, id]
+    'UPDATE novels SET title=$1, author=$2, description=$3, genres=$4, status=$5 WHERE id=$6 RETURNING *',
+    [title, author, description, genres, status, id]
   );
   return result.rows[0];
 };
