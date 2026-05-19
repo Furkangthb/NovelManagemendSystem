@@ -8,27 +8,39 @@ const createNovel = async (user_id, title, author, description, genres, status) 
   return result.rows[0];
 };
 
-const getAllNovels = async (genre, status, search) => {
-  let query = 'SELECT * FROM novels WHERE 1=1';
+const getAllNovels = async (genre, status, search, rating) => {
+  let query = `
+    SELECT n.*, ROUND(COALESCE(AVG(c.rating), 0), 1) as average_rating 
+    FROM novels n
+    LEFT JOIN comments c ON n.id = c.novel_id
+    WHERE 1=1
+  `;
   const params = [];
 
   if (genre) {
-
     params.push(`%${genre}%`);
-    query += ` AND genres::text ILIKE $${params.length}`;
+    query += ` AND n.genres::text ILIKE $${params.length}`;
   }
 
   if (status) {
     params.push(status);
-    query += ` AND status = $${params.length}`;
+    query += ` AND n.status = $${params.length}`;
   }
 
   if (search) {
     params.push(`%${search}%`);
-    query += ` AND (title ILIKE $${params.length} OR author ILIKE $${params.length})`;
+    query += ` AND (n.title ILIKE $${params.length} OR n.author ILIKE $${params.length})`;
   }
 
-  query += ' ORDER BY created_at DESC';
+  query += ` GROUP BY n.id`;
+
+  if (rating) {
+    params.push(parseFloat(rating));
+    query += ` HAVING COALESCE(AVG(c.rating), 0) >= $${params.length}`;
+  }
+
+  query += ' ORDER BY n.created_at DESC';
+  
   const result = await pool.query(query, params);
   return result.rows;
 };

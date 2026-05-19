@@ -140,6 +140,11 @@ paths:
           schema:
             type: string
           description: Duruma göre filtrele
+        - in: query
+          name: rating
+          schema:
+            type: integer
+          description: Minimum yıldız puanına göre filtrele (Örn. 3, 4, 5)
       responses:
         '200':
           description: Novel listesi başarıyla getirildi

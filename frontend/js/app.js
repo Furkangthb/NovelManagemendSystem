@@ -1,6 +1,20 @@
 const appEl = document.getElementById('main-content');
 const navbarEl = document.getElementById('navbar');
 
+const initTheme = () => {
+  const theme = localStorage.getItem('theme') || 'dark';
+  if (theme === 'dark') {
+    document.body.classList.add('dark-theme');
+  }
+};
+initTheme(); 
+
+const toggleTheme = () => {
+  const isDark = document.body.classList.toggle('dark-theme');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  renderNavbar(); 
+};
+
 const router = {
   navigate: (page, params = {}) => {
     renderNavbar();
@@ -18,21 +32,19 @@ const router = {
 
 const renderNavbar = () => {
   const user = auth.getUser();
+  const isDark = document.body.classList.contains('dark-theme'); // Hangi temada olduğumuzu kontrol et
+
   navbarEl.innerHTML = `
-    <div class="nav-brand" onclick="router.navigate('home')">
+    <div class="nav-brand" onclick="router.navigate('home')" style="cursor:pointer;">
       <span class="nav-brand-icon">📖</span>
       <span class="nav-brand-text">NovelHub</span>
     </div>
-    <div class="nav-right">
-      <div class="nav-search">
-        <span class="nav-search-icon">🔍</span>
-        <input 
-          type="text" 
-          placeholder="Novel ara..." 
-          onkeydown="handleSearch(event)"
-          id="search-input"
-        >
-      </div>
+    <div class="nav-right" style="display: flex; align-items: center; gap: 10px;">
+      
+      <button class="btn btn-outline" style="border:none; font-size:1.2rem; padding:0.2rem 0.5rem; background: transparent;" onclick="toggleTheme()" title="Gece/Gündüz Modu">
+        ${isDark ? '☀️' : '🌙'}
+      </button>
+
       ${user ? `
         <span style="color: var(--muted); font-size: 0.9rem;">👤 ${user.username}</span>
         ${auth.isAuthor() ? `

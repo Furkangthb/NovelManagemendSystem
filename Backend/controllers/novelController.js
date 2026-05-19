@@ -12,8 +12,8 @@ const createNovel = async (req, res) => {
 
 const getAllNovels = async (req, res) => {
   try {
-    const { genre, status, search } = req.query;
-    const novels = await novelService.getAllNovels(genre, status, search);
+    const { genre, status, search, rating } = req.query;
+    const novels = await novelService.getAllNovels(genre, status, search, rating);
     res.status(200).json({ novels });
   } catch (error) {
     res.status(500).json({ error: error.message });

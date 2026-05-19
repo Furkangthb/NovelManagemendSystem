@@ -23,8 +23,8 @@ const createNovel = async (user_id, title, author, description, genres, status) 
   return await novelModel.createNovel(user_id, title, author, description, cleanGenres, status || 'Devam Ediyor');
 };
 
-const getAllNovels = async (genre, status, search) => {
-  return await novelModel.getAllNovels(genre, status, search);
+const getAllNovels = async (genre, status, search, rating) => {
+  return await novelModel.getAllNovels(genre, status, search, rating);
 };
 
 const getNovelById = async (id) => {
