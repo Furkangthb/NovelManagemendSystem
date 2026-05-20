@@ -4,7 +4,9 @@ const VALID_GENRES = ['Aksiyon', 'Fantastik', 'Romance', 'Korku', 'Bilim Kurgu',
 const VALID_STATUSES = ['Devam Ediyor', 'Tamamlandı', 'Askıya Alındı'];
 
 const createNovel = async (user_id, title, author, description, genres, status) => {
-  if (!title || !author) throw new Error('Başlık ve yazar zorunludur');
+  if (!title || title.trim().length === 0 || !author || author.trim().length === 0) {
+  throw new Error('Başlık ve yazar zorunludur ve sadece boşluktan oluşamaz');
+}
 
   if (!genres || genres.length === 0) {
     throw new Error('En az bir tür seçmelisiniz');

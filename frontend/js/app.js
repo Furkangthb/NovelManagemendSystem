@@ -7,25 +7,25 @@ const initTheme = () => {
     document.body.classList.add('dark-theme');
   }
 };
-initTheme(); 
+initTheme();
 
 const toggleTheme = () => {
   const isDark = document.body.classList.toggle('dark-theme');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  renderNavbar(); 
+  renderNavbar();
 };
 
 const router = {
   navigate: (page, params = {}) => {
     renderNavbar();
     switch (page) {
-      case 'home':     homePage.render(params); break;
-      case 'novel':    novelPage.render(params); break;
-      case 'read':     readPage.render(params); break;
-      case 'panel':    panelPage.render(params); break;
-      case 'login':    authPage.renderLogin(); break;
+      case 'home': homePage.render(params); break;
+      case 'novel': novelPage.render(params); break;
+      case 'read': readPage.render(params); break;
+      case 'panel': panelPage.render(params); break;
+      case 'login': authPage.renderLogin(); break;
       case 'register': authPage.renderRegister(); break;
-      default:         homePage.render(params);
+      default: homePage.render(params);
     }
   }
 };
@@ -161,19 +161,36 @@ const authPage = {
   },
 
   handleRegister: async () => {
-    const username = document.getElementById('username').value;
-    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const isAuthor = document.getElementById('isAuthor').checked;
     const errorDiv = document.getElementById('auth-error');
 
     if (!username || !email || !password) {
-      errorDiv.textContent = 'Tüm alanlar zorunludur';
+      errorDiv.textContent = 'Tüm alanlar zorunludur.';
+      return;
+    }
+
+    if (username.length < 3) {
+      errorDiv.textContent = 'Kullanıcı adı en az 3 karakter olmalıdır.';
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      errorDiv.textContent = 'Lütfen geçerli bir e-posta adresi giriniz.';
+      return;
+    }
+
+    if (password.length < 6) {
+      errorDiv.textContent = 'Şifre güvenlik amacıyla en az 6 karakter olmalıdır.';
       return;
     }
 
     try {
       await api.register({ username, email, password, role: isAuthor ? 'author' : 'reader' });
+      alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
       router.navigate('login');
     } catch (error) {
       errorDiv.textContent = error.message;
@@ -181,7 +198,6 @@ const authPage = {
   },
 };
 
-// Başlat
 document.addEventListener('DOMContentLoaded', () => {
   router.navigate('home');
 });

@@ -221,8 +221,8 @@ const novelPage = {
     const content = pages.join('|||PAGE|||');
     const errorDiv = modal.querySelector('#chapter-error');
 
-    if (!chapter_number || !title || !content) {
-      errorDiv.textContent = 'Bölüm numarası, başlık ve en az bir sayfa içerik zorunludur.';
+   if (!chapter_number || !title || title.trim().length === 0 || !content) {
+      errorDiv.textContent = 'Bölüm numarası, başlık (boş olamaz) ve en az bir sayfa içerik zorunludur.';
       return;
     }
 
@@ -296,8 +296,8 @@ const novelPage = {
     
     const errorDiv = modal.querySelector('#edit-chapter-error');
 
-    if (!chapter_number || !title || !content) {
-      errorDiv.textContent = 'Bölüm numarası, başlık ve en az bir sayfa içerik zorunludur.';
+    if (!chapter_number || !title || title.trim().length === 0 || !content) {
+      errorDiv.textContent = 'Bölüm numarası, başlık (boş olamaz) ve en az bir sayfa içerik zorunludur.';
       return;
     }
 
@@ -325,8 +325,8 @@ const novelPage = {
     const ratingEl = document.querySelector('input[name="rating"]:checked');
     const errorDiv = document.getElementById('comment-error');
 
-    if (!text || !ratingEl) {
-      errorDiv.textContent = 'Yorum ve puan zorunludur';
+    if (!text || text.trim().length === 0 || !ratingEl) {
+      errorDiv.textContent = 'Yorum metni (sadece boşluk olamaz) ve puan zorunludur.';
       return;
     }
 
@@ -411,8 +411,8 @@ const novelPage = {
     const status = modal.querySelector('#edit-status').value;
     const errorDiv = modal.querySelector('#edit-error');
 
-    if (!title || !author) {
-      errorDiv.textContent = 'Başlık ve yazar zorunludur';
+    if (!title || title.trim().length === 0 || !author || author.trim().length === 0) {
+      errorDiv.textContent = 'Başlık ve yazar zorunludur ve sadece boşluktan oluşamaz.';
       return;
     }
 

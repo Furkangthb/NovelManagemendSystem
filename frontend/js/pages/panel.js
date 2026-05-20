@@ -131,10 +131,10 @@ const panelPage = {
     const status = document.getElementById('novel-status').value;
     const errorDiv = document.getElementById('novel-error');
 
-    if (!title || !author) {
-      errorDiv.textContent = 'Başlık ve yazar zorunludur';
-      return;
-    }
+    if (!title || title.trim().length === 0 || !author || author.trim().length === 0) {
+    errorDiv.textContent = 'Başlık ve yazar zorunludur ve sadece boşluktan oluşamaz.';
+    return;
+  }
 
     if (genres.length === 0) {
       errorDiv.textContent = 'En az bir tür seçmelisiniz';

@@ -2,7 +2,9 @@ const chapterModel = require('../models/chapterModel');
 const novelModel = require('../models/novelModel');
 
 const createChapter = async (novel_id, user_id, chapter_number, title, content) => {
-  if (!chapter_number || !title || !content) throw new Error('Bölüm numarası, başlık ve içerik zorunludur');
+  if (!chapter_number || !title || title.trim().length === 0 || !content || content.trim().length === 0) {
+  throw new Error('Bölüm numarası, başlık ve içerik zorunludur ve sadece boşluktan oluşamaz');
+}
   
   if (chapter_number < 1) throw new Error('Bölüm numarası 1 veya daha büyük olmalıdır');
   if (chapter_number > 9999) throw new Error('Bölüm numarası 9999\'dan büyük olamaz');
@@ -29,7 +31,9 @@ const getChapterById = async (id) => {
 };
 
 const updateChapter = async (id, user_id, title, content) => {
-  if (!title || !content) throw new Error('Başlık ve içerik zorunludur');
+  if (!title || title.trim().length === 0 || !content || content.trim().length === 0) {
+  throw new Error('Başlık ve içerik zorunludur ve sadece boşluktan oluşamaz');
+}
 
   const chapter = await chapterModel.getChapterById(id);
   if (!chapter) throw new Error('Bölüm bulunamadı');

@@ -2,9 +2,18 @@ const commentModel = require('../models/commentModel');
 const novelModel = require('../models/novelModel');
 
 const createComment = async (novel_id, user_id, text, rating) => {
-  if (!text) throw new Error('Yorum metni zorunludur');
+ if (!text || text.trim().length === 0) {
+  throw new Error('Yorum metni zorunludur ve sadece boşluktan oluşamaz');
+}
   if (rating === null || rating === undefined) throw new Error('Puan zorunludur');
-  if (rating < 1 || rating > 5) throw new Error('Puan 1 ile 5 arasında olmalıdır');
+  
+  const numericRating = Number(rating);
+  if (isNaN(numericRating) || !Number.isInteger(numericRating)) {
+    throw new Error('Puan geçerli bir tam sayı olmalıdır');
+  }
+  if (numericRating < 1 || numericRating > 5) {
+    throw new Error('Puan 1 ile 5 arasında olmalıdır');
+  }
   const novel = await novelModel.getNovelById(novel_id);
   if (!novel) throw new Error('Novel bulunamadı');
 
