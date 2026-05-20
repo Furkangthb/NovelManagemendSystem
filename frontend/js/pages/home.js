@@ -57,7 +57,7 @@ const homePage = {
     }
   },
 
-  renderNovelsGrid: (novels) => {
+renderNovelsGrid: (novels) => {
     const gridEl = document.getElementById('novels-grid');
     
     if (novels.length === 0) {
@@ -66,6 +66,7 @@ const homePage = {
     }
 
     gridEl.innerHTML = novels.map(novel => {
+      // 1. Tür Rozetleri
       let genresHtml = '';
       let firstGenre = '';
       if (novel.genres && novel.genres.length > 0) {
@@ -73,25 +74,46 @@ const homePage = {
         if (typeof novel.genres === 'string') {
           gArray = novel.genres.replace(/[{}]/g, '').split(',').map(g => g.trim());
         }
-        firstGenre = gArray[0];
-        genresHtml = `<span class="novel-genre-badge" style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.1);">${firstGenre}</span>`;
+        
+        firstGenre = gArray[0]; 
+        
+        genresHtml = gArray.map(g => 
+          `<span class="novel-genre-badge" style="font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: rgba(148, 163, 184, 0.2); display: inline-block;">${g}</span>`
+        ).join('');
       }
 
+      // 2. Yıldız Puanı
       const ratingVal = parseFloat(novel.average_rating);
       const ratingHtml = ratingVal > 0 
         ? `<span style="color: #f39c12; font-weight: bold; font-size: 0.9rem;">⭐ ${ratingVal}</span>` 
-        : `<span style="color: #aaa; font-size: 0.8rem; font-style: italic;">Yeni Eklendi</span>`;
+        : `<span style="color: #aaa; font-size: 0.8rem; font-style: italic;">Yeni</span>`;
+
+      let statusColor = '#3b82f6'; 
+      if (novel.status === 'Tamamlandı') statusColor = '#10b981';
+      else if (novel.status === 'Askıya Alındı') statusColor = '#ef4444';
+
+      const statusBadgeHtml = `
+        <div style="position: absolute; top: 10px; right: 10px; background-color: ${statusColor}; color: #fff; font-size: 0.7rem; font-weight: bold; padding: 4px 8px; border-radius: 4px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+          ${novel.status || 'Devam Ediyor'}
+        </div>
+      `;
 
       return `
-        <div class="novel-card" onclick="router.navigate('novel', {id: ${novel.id}})" style="cursor: pointer; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s;">
-          <div class="novel-card-image" id="cover-home-${novel.id}" style="height: 300px; background: #eee; display: flex; align-items: center; justify-content: center; position: relative;">
-             <span style="font-size: 3rem;">📚</span>
-             </div>
+        <div class="novel-card" onclick="router.navigate('novel', {id: ${novel.id}})" style="cursor: pointer; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; display: flex; flex-direction: column;">
           
-          <div class="novel-card-content" style="padding: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              ${genresHtml}
-              ${ratingHtml}
+          <div class="novel-card-image" id="cover-home-${novel.id}" style="height: 300px; background: #eee; display: flex; align-items: center; justify-content: center; position: relative;">
+             ${statusBadgeHtml}
+             <span style="font-size: 3rem;">📚</span>
+          </div>
+          
+          <div class="novel-card-content" style="padding: 1rem; display: flex; flex-direction: column; flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                ${genresHtml}
+              </div>
+              <div style="white-space: nowrap; margin-left: 8px;">
+                ${ratingHtml}
+              </div>
             </div>
             <h3 style="margin: 0 0 0.4rem 0; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${novel.title}">${novel.title}</h3>
             <p style="margin: 0; color: #666; font-size: 0.9rem;">✍️ ${novel.author}</p>
@@ -113,11 +135,18 @@ const homePage = {
         
         const coverEl = document.getElementById(`cover-home-${novel.id}`);
         if (coverEl) {
-          coverEl.innerHTML = `<img src="${coverUrl}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1614729939124-03290b5609ce?w=400&h=600&fit=crop'" />`;
+          const placeholder = coverEl.querySelector('span');
+          if (placeholder) placeholder.remove();
+
+          const imgHtml = `<img src="${coverUrl}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;" onerror="this.src='https://images.unsplash.com/photo-1614729939124-03290b5609ce?w=400&h=600&fit=crop'" />`;
+          
+          coverEl.insertAdjacentHTML('beforeend', imgHtml);
         }
       });
     }
   },
+
+    
 
   applyFilters: async () => {
     const search = document.getElementById('filter-search').value;
